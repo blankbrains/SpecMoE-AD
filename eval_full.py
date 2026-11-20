@@ -1,10 +1,4 @@
-"""M²B-MoE fixed-protocol evaluation with the required 13 metrics.
-
-Usage:
-  python eval_full.py --checkpoint checkpoints/xxx/best_model.pt --dataset smd
-
-13 指标: P, R, F1, P_PA, R_PA, F1_PA, Aff-F1, AUC-ROC, AUC-PR, R-AUC-ROC, R-AUC-PR, VUS-ROC, VUS-PR
-"""
+"""Segmented evaluation of SpecMoE-AD checkpoints with 13 detection metrics."""
 import sys, os, argparse, hashlib, torch, numpy as np, time, json
 from collections.abc import Mapping
 from sklearn.metrics import roc_auc_score, average_precision_score

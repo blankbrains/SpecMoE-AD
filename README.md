@@ -29,7 +29,7 @@ Use a Python environment with PyTorch appropriate for your hardware, then instal
 python -m pip install -r requirements.txt
 ~~~
 
-The local CPU checks used Python 3.12.4, PyTorch 2.13.0, and NumPy 2.5.1. The original declared NumPy range is retained below 2. A fresh environment satisfying that constraint and CUDA execution require further verification.
+The local CPU checks used Python 3.12.4, PyTorch 2.13.0, and NumPy 2.5.1. The dependency file specifies NumPy below 2. CPU checks did not cover that NumPy range or CUDA execution.
 
 ## Data preparation
 
@@ -47,7 +47,7 @@ Preserve entity boundaries and record data conversions. Sources are [Telemanom](
 
 ## Train and evaluate
 
-The following example uses MSL. Select the matching YAML and lowercase dataset name for the other datasets.
+The commands below train and evaluate the MSL configuration. Select the matching YAML and lowercase dataset name for the other datasets.
 
 ~~~sh
 python -B run_specmoe.py protocol --config configs/msl.yaml
@@ -55,23 +55,23 @@ python -B run_specmoe.py train --config configs/msl.yaml --device cpu --seed 42 
 python -B eval_full.py --checkpoint checkpoints/msl_seed42/best_model.pt --dataset msl --data_root datasets --device cpu --strategy mv_sr_rank --n_rounds 3 --output checkpoints/msl_seed42/metrics.json
 ~~~
 
-Use cuda when the GPU environment is ready. Use a fresh save_dir for each new run. Prepare configuration changes before training and preserve the complete code/configuration snapshot with its checkpoints. Strict loading verifies source fingerprints.
+Use cuda when the GPU environment is ready. Use a fresh save_dir for each new run. Prepare configuration changes before training and preserve the complete code/configuration snapshot with its checkpoints. Strict loading verifies source fingerprints. Use the same release and source files when training and loading a checkpoint. Checkpoints created with [v1.0.0](https://github.com/blankbrains/SpecMoE-AD/tree/v1.0.0) require that version.
 
 The evaluator writes the 13 metrics and protocol/checkpoint identities into the requested JSON report. Three scoring rounds belong to one evaluation. Three independent training runs require separate seeds and checkpoint directories.
 
-For the manuscript score, use the segmented evaluator above. The separate detect command below produces binary alarms on a single input using the checkpoint-calibrated reconstruction score. Its threshold belongs to that score and cannot be applied to the five-view rank score.
+For the manuscript score, use the segmented evaluator above. Set the shell variable `MSL_TEST_FILE` to the path of the MSL channel array to score before running detection. The separate detect command below produces binary alarms on a single input using the checkpoint-calibrated reconstruction score. Its threshold belongs to that score and cannot be applied to the five-view rank score.
 
 ~~~sh
-python -B run_specmoe.py detect --data datasets/MSL/test/example.npy --model checkpoints/msl_seed42/best_model.pt --device cpu --output checkpoints/msl_seed42/predictions.npz
+python -B run_specmoe.py detect --data "$MSL_TEST_FILE" --model checkpoints/msl_seed42/best_model.pt --device cpu --output checkpoints/msl_seed42/predictions.npz
 ~~~
 
-Replace the input path with an existing file. See each command's --help for options. Model training and evaluation should use the recorded data and configuration for the intended experiment.
+See each command's --help for options. Model training and evaluation should use the recorded data and configuration for the intended experiment.
 
 ## Validation and use
 
-All five configurations were checked on CPU. A synthetic-data run exercised training, checkpoint loading, and evaluation with all 13 metrics. The original benchmark run outputs are unavailable. Each dataset is distributed under its provider’s terms.
+All five configurations passed CPU configuration checks. The training, checkpoint loading, and 13-metric evaluation checks covered pipeline execution only. The original benchmark run outputs are unavailable. Each dataset is distributed under its provider’s terms.
 
 
 ## Single-class test segments
 
-All test points, including normal-only source tails, participate in the pooled point metrics. Range AUC and VUS are computed only for segments containing both label classes, then weighted by their eligible segment lengths. Undefined per-segment values are recorded as null with zero aggregation weight and an explicit single_label_class reason. If no segment has both classes, evaluation fails explicitly instead of emitting invented values. Event boundaries remain separate. The report identifies this aggregation policy; it is not evidence for how unavailable historical outputs were computed.
+All test points, including normal-only source tails, participate in the pooled point metrics. Range AUC and VUS are computed only for segments containing both label classes, then weighted by their eligible segment lengths. Undefined per-segment values are recorded as null with zero aggregation weight and an explicit single_label_class reason. If no segment has both classes, evaluation exits with an error. Event boundaries remain separate. The report identifies this aggregation policy; it is not evidence for how unavailable historical outputs were computed.

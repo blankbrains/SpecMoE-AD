@@ -67,7 +67,6 @@ REQUIRED_RESOLVED_CONFIG_KEYS = frozenset(
 
 _SOURCE_FINGERPRINT_EXCLUDED_DIRECTORIES = frozenset(
     {
-        ".agent-backups",
         ".git",
         ".mypy_cache",
         ".pytest_cache",
@@ -81,7 +80,6 @@ _SOURCE_FINGERPRINT_EXCLUDED_DIRECTORIES = frozenset(
         "results",
         "tests",
         "venv",
-        "计划方案",
     }
 )
 
