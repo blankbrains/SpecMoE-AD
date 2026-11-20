@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+*.env
+datasets/
+checkpoints/
+outputs/
+*.log
+*.pt
+*.pth
+*.npz
+*.npy
